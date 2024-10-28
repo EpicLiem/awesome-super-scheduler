@@ -2,15 +2,36 @@ import 'dotenv/config';
 import bcrypt from 'bcrypt'
 import { cookies } from 'next/headers'
 import {EmailParams, MailerSend, Recipient, Sender} from "mailersend";
+import {NextRequest} from "next/server";
 
-export async function GET(request) {
-    const req = request.json()
+export const config = {
+    api: {
+        bodyParser: true,
+    },
+}
 
-    if (await bcrypt.compare(req.email + req.digits, cookies().get('pendingtoken'))) {
-        const sessionid = await bcrypt.hash('Authorized' + req.email)
+async function streamToJSON(stream) {
+    const chunks = [];
+    for await (const chunk of stream) {
+        chunks.push(chunk);
+    }
+    return JSON.parse(Buffer.concat(chunks).toString('utf8'));
+}
+
+export async function POST(request) {
+    const data = await streamToJSON(request.body);
+    console.log(data)
+    const pendingtoken = cookies().get('pendingtoken').value
+    console.log('=======================================')
+    console.log(pendingtoken)
+    if (await bcrypt.compare(data.email + data.digits, pendingtoken)) {
+        const sessionid = await bcrypt.hash('Authorized' + data.email, process.env.SALT)
         return new Response('Authorized', {
             status: 200,
-            headers: { 'Set-Cookie': `token=${sessionid}` },
+            headers: {
+                'Set-Cookie': `token=${sessionid}`,
+                'Access-Control-Allow-Origin': 'localhost:3000',
+                'Acess-Control-Expose-Headers': 'Set-Cookie'},
         })
     } else {
         return new Response('Unauthorized', {

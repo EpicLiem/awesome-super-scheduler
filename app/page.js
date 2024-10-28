@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Bell, Calendar, Dumbbell } from "lucide-react"
+import Link from "next/link";
 
 export default function Homepage() {
     return (
@@ -10,7 +11,9 @@ export default function Homepage() {
                     <Dumbbell className="h-8 w-8 text-orange-600" />
                     <h1 className="text-2xl font-bold text-orange-600">GFS Fitness Scheduler</h1>
                 </div>
-                <Button variant="outline" className="border-orange-600 text-orange-600 hover:bg-orange-100">Sign In</Button>
+                <Link href={'/signin'}>
+                    <Button variant="outline" className="border-orange-600 text-orange-600 hover:bg-orange-100">Sign In</Button>
+                </Link>
             </header>
             <main className="container mx-auto px-4 py-12">
                 <section className="text-center mb-16">

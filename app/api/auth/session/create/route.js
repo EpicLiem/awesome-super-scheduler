@@ -23,9 +23,9 @@ export async function GET(request) {
         .setTo(recipients)
         .setReplyTo(sentFrom)
         .setSubject("Your Code")
-        .setText("Your code is:" +digits.join());
+        .setText("Your code is:" +digits.join(''));
     await mailerSend.email.send(emailParams);
-    const sessionid = await bcrypt.hash(searchparams.get('email') + digits.join(), process.env.SALT)
+    const sessionid = await bcrypt.hash(searchparams.get('email') + digits.join(''), process.env.SALT)
     if (await bcrypt.compare(searchparams.get('email') + digits.join(), sessionid)) {
         console.log('verified')
     } else {
@@ -36,6 +36,8 @@ export async function GET(request) {
     console.log("sessionid" + sessionid)
     return new Response('Authorized', {
         status: 200,
-        headers: { 'Set-Cookie': `pendingtoken=${sessionid}` },
+        headers: { 'Set-Cookie': `pendingtoken=${sessionid}`,
+            'Access-Control-Allow-Origin': 'localhost:3000',
+            'Acess-Control-Expose-Headers': 'Set-Cookie' },
     })
 }
