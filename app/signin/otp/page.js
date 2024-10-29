@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef    } from "react"
+import { useState, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -11,7 +11,6 @@ import { useRouter } from "next/navigation";
 export default function OTPInput() {
     const [otp, setOtp] = useState("")
     const inputRefs = useRef([])
-    const searchParams = useSearchParams()
     const [failed, setFailed] = useState(false)
     const [failure, setFailure] = useState('')
     const router = useRouter()
@@ -37,6 +36,7 @@ export default function OTPInput() {
     }
 
     const handleSubmit = (e) => {
+        const searchParams = useSearchParams()
         e.preventDefault()
         const res = fetch("/api/auth/session/authorize", {
                 credentials: "same-origin",
