@@ -1,9 +1,18 @@
 "use client"
 
 import * as React from "react"
-import { Calendar as CalendarIcon, Dumbbell, Home, Settings, User } from "lucide-react"
+import { Calendar as CalendarIcon, Dumbbell, Home, Settings, User, X } from "lucide-react"
 import { Calendar } from "@/components/ui/calendar"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog"
 import {
     Sidebar,
     SidebarContent,
@@ -17,9 +26,10 @@ import {
     SidebarRail,
     SidebarTrigger,
 } from "@/components/ui/sidebar"
+import {Suspense} from "react";
 
 // Sample data for available slots
-const availableSlots = [
+const availableSlotsReal = [
     { date: new Date(2024, 9, 28), slots: [
             { time: "09:00 AM", duration: "1 hour" },
             { time: "11:00 AM", duration: "1 hour" },
@@ -36,14 +46,34 @@ const availableSlots = [
         ]},
 ]
 
-export default function Dashboard() {
+function GetAvailableSlots() {
+    return new Promise(resolve => {setTimeout(resolve(availableSlotsReal), 5000)})
+}
+
+export default async function Dashboard() {
     const [date, setDate] = React.useState(new Date())
+    const [selectedSlot, setSelectedSlot] = React.useState(null)
+    const [isDialogOpen, setIsDialogOpen] = React.useState(false)
+
+    const availableSlots = await GetAvailableSlots()
 
     const slotsForSelectedDay = availableSlots.find(
         (day) => day.date.toDateString() === date?.toDateString()
     )?.slots || []
 
+    const handleSlotClick = (slot) => {
+        setSelectedSlot(slot)
+        setIsDialogOpen(true)
+    }
+
+    const handleConfirm = () => {
+        console.log(`Booking confirmed for ${selectedSlot?.time} on ${date?.toDateString()}`)
+        setIsDialogOpen(false)
+        setSelectedSlot(null)
+    }
+
     return (
+        <Suspense>
         <SidebarProvider>
             <div className="flex h-screen bg-gradient-to-br from-orange-400 via-orange-200 to-blue-300">
                 <Sidebar>
@@ -82,9 +112,11 @@ export default function Dashboard() {
                         </SidebarMenu>
                     </SidebarContent>
                     <SidebarFooter>
-                        {/* Add footer content if needed */}
+                        <footer className="container mx-auto px-4 py-6 text-center text-orange-600">
+                            © {new Date().getFullYear()} Awesome and Super Studios (ASS)
+                        </footer>
                     </SidebarFooter>
-                    <SidebarRail />
+                    <SidebarRail/>
                 </Sidebar>
                 <SidebarInset className="flex-1 overflow-auto">
                     <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background/95 px-6 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -116,12 +148,16 @@ export default function Dashboard() {
                                 </CardHeader>
                                 <CardContent>
                                     {slotsForSelectedDay.length > 0 ? (
-                                        <ul className="space-y-2">
+                                        <ul className="space-y-3">
                                             {slotsForSelectedDay.map((slot, index) => (
-                                                <li key={index} className="flex justify-between items-center bg-orange-100 p-2 rounded">
+                                                <button
+                                                    key={index}
+                                                    className="flex justify-between items-center w-full bg-orange-100 p-2 rounded transition-all duration-300 hover:bg-orange-200 hover:shadow-md transform hover:-translate-y-1"
+                                                    onClick={() => handleSlotClick(slot)}
+                                                >
                                                     <span className="font-medium">{slot.time}</span>
                                                     <span className="text-sm text-gray-600">{slot.duration}</span>
-                                                </li>
+                                                </button>
                                             ))}
                                         </ul>
                                     ) : (
@@ -165,6 +201,32 @@ export default function Dashboard() {
                     </main>
                 </SidebarInset>
             </div>
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Confirm Booking</DialogTitle>
+                        <DialogDescription>
+                            Are you sure you want to book this slot?
+                        </DialogDescription>
+                    </DialogHeader>
+                    {selectedSlot && (
+                        <div>
+                            <p><strong>Date:</strong> {date?.toDateString()}</p>
+                            <p><strong>Time:</strong> {selectedSlot.time}</p>
+                            <p><strong>Duration:</strong> {selectedSlot.duration}</p>
+                        </div>
+                    )}
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+                            Cancel
+                        </Button>
+                        <Button onClick={handleConfirm}>
+                            Confirm Booking
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </SidebarProvider>
+        </Suspense>
     )
 }

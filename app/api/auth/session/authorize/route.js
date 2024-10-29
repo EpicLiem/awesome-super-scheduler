@@ -1,14 +1,7 @@
 import 'dotenv/config';
 import bcrypt from 'bcrypt'
 import { cookies } from 'next/headers'
-import {EmailParams, MailerSend, Recipient, Sender} from "mailersend";
-import {NextRequest} from "next/server";
 
-export const config = {
-    api: {
-        bodyParser: true,
-    },
-}
 
 async function streamToJSON(stream) {
     const chunks = [];
@@ -29,7 +22,7 @@ export async function POST(request) {
         return new Response('Authorized', {
             status: 200,
             headers: {
-                'Set-Cookie': `token=${sessionid}`,
+                'Set-Cookie': `token=${sessionid},email=${data.email}`,
                 'Access-Control-Allow-Origin': 'localhost:3000',
                 'Acess-Control-Expose-Headers': 'Set-Cookie'},
         })

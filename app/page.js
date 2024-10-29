@@ -21,7 +21,7 @@ export default function Homepage() {
                     <p className="text-xl text-orange-700 mb-8">
                         Easily schedule your workouts and never miss an opening at the Germantown Friends School fitness club
                     </p>
-                    <Button size="lg" className="text-lg px-8 bg-orange-600 hover:bg-orange-700 text-white">
+                    <Button size="lg" className="text-lg px-8 bg-orange-600 hover:bg-orange-700 text-white" href={'/signin'}>
                         Start Booking
                     </Button>
                 </section>
