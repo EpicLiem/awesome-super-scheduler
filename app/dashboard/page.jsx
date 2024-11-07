@@ -26,7 +26,7 @@ import {
     SidebarRail,
     SidebarTrigger,
 } from "@/components/ui/sidebar"
-import {Suspense} from "react";
+import {Suspense, useEffect} from "react";
 
 // Sample data for available slots
 const availableSlotsReal = [
@@ -46,16 +46,75 @@ const availableSlotsReal = [
         ]},
 ]
 
-function GetAvailableSlots() {
-    return new Promise(resolve => {setTimeout(resolve(availableSlotsReal), 5000)})
+async function GetAvailableSlots(userData)  {
+    if (!userData) return []
+    const AvailableSlots = userData.availableSlots.map((x) => {
+        const [year, month, day] = x.date.split("-").map(Number);
+        return {
+            date: new Date(year, month - 1, day), // Month is 0-indexed
+            slots: x.slots.map((y) => ({
+                time: y,
+                duration: "1 hour",
+            }))
+        };
+    });
+    console.log(AvailableSlots)
+    console.log(AvailableSlots[0].date.toDateString())
+    return AvailableSlots
 }
 
-export default async function Dashboard() {
+async function fetchData() {
+    const res = await fetch('/api/dashboard', {'credentials': 'include'})
+    return await res.json()
+}
+
+export default function Dashboard() {
     const [date, setDate] = React.useState(new Date())
     const [selectedSlot, setSelectedSlot] = React.useState(null)
     const [isDialogOpen, setIsDialogOpen] = React.useState(false)
+    const [availableSlots, setAvailableSlots] = React.useState(availableSlotsReal)
+    const [userData, setUserData] = React.useState(false)
+    const [numAvailableSlotsNow, setNumAvailableSlotsNow] = React.useState(0)
+    const [totalScheduledSlots, setTotalScheduledSlots] = React.useState(0)
 
-    const availableSlots = await GetAvailableSlots()
+
+
+
+    useEffect(() => {
+        fetchData().then(setUserData)
+        console.log(userData)
+    }, [])
+
+    useEffect(() => {
+        GetAvailableSlots(userData).then(setAvailableSlots)
+    }, [userData])
+
+    useEffect(() => {
+        const x = availableSlots.find(
+            (day) => day.date.toDateString() === new Date().toDateString()
+        )?.slots.length
+        if (!x) {
+            setNumAvailableSlotsNow(0)
+        } else {
+            setNumAvailableSlotsNow(x)
+        }
+    }, [availableSlots])
+
+    useEffect(() => {
+        console.log(userData)
+        if (!userData) {
+            console.log(userData)
+            return;
+        }
+        let x = 0
+        for (let i = 0; i < userData.scheduled; i++) {
+            console.log(userData.scheduled)
+            x += userData.scheduled[i].slots.length
+        }
+        setTotalScheduledSlots(0)
+        setTotalScheduledSlots(x)
+
+    }, [availableSlots])
 
     const slotsForSelectedDay = availableSlots.find(
         (day) => day.date.toDateString() === date?.toDateString()
@@ -169,12 +228,12 @@ export default async function Dashboard() {
                         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                             <Card>
                                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                    <CardTitle className="text-sm font-medium">Total Bookings</CardTitle>
+                                    <CardTitle className="text-sm font-medium">Total Workouts Scheduled</CardTitle>
                                     <CalendarIcon className="h-4 w-4 text-muted-foreground" />
                                 </CardHeader>
                                 <CardContent>
-                                    <div className="text-2xl font-bold">24</div>
-                                    <p className="text-xs text-muted-foreground">+10% from last month</p>
+                                    <div className="text-2xl font-bold">{totalScheduledSlots}</div>
+                                    <p className="text-xs text-muted-foreground">Idk insert motivation here</p>
                                 </CardContent>
                             </Card>
                             <Card>
@@ -183,7 +242,7 @@ export default async function Dashboard() {
                                     <Dumbbell className="h-4 w-4 text-muted-foreground" />
                                 </CardHeader>
                                 <CardContent>
-                                    <div className="text-2xl font-bold">7</div>
+                                    <div className="text-2xl font-bold">{numAvailableSlotsNow}</div>
                                     <p className="text-xs text-muted-foreground">For today</p>
                                 </CardContent>
                             </Card>

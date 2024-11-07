@@ -22,7 +22,7 @@ export async function POST(request) {
         return new Response('Authorized', {
             status: 200,
             headers: {
-                'Set-Cookie': `token=${sessionid},email=${data.email}`,
+                'Set-Cookie': `token=${sessionid};path=/,email=${data.email};path=/`,
                 'Access-Control-Allow-Origin': 'localhost:3000',
                 'Acess-Control-Expose-Headers': 'Set-Cookie'},
         })
