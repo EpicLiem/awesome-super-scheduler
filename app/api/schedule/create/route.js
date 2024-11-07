@@ -1,7 +1,7 @@
 import { sql } from '@vercel/postgres';
 import bcrypt from "bcrypt";
 import {cookies} from "next/headers";
-import {authMiddleware} from "@/lib/utils";
+import {authMiddleware} from "@/lib/server/utils";
 
 export default async function handler(req, res) {
     if (req.method !== 'POST') {
