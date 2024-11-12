@@ -28,7 +28,7 @@ import {
 } from "@/components/ui/sidebar"
 import {Suspense, useEffect} from "react";
 
-// Sample data for available slots
+// Sample data for available slots (TESTING ONLY)
 const availableSlotsReal = [
     { date: new Date(2024, 9, 28), slots: [
             { time: "09:00 AM", duration: "1 hour" },
@@ -126,6 +126,20 @@ export default function Dashboard() {
     }
 
     const handleConfirm = () => {
+        if(!date) {
+            setIsDialogOpen(false)
+            setSelectedSlot(null)
+            return
+        }
+        const res = fetch('/api/schedule/create', {
+            credentials: 'include',
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({date: date.toDateString(), time: selectedSlot.time})
+        })
+        console.log(res)
         console.log(`Booking confirmed for ${selectedSlot?.time} on ${date?.toDateString()}`)
         setIsDialogOpen(false)
         setSelectedSlot(null)

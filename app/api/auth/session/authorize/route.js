@@ -1,15 +1,8 @@
 import 'dotenv/config';
 import bcrypt from 'bcrypt'
 import { cookies } from 'next/headers'
+import {streamToJSON} from "@/lib/server/utils";
 
-
-async function streamToJSON(stream) {
-    const chunks = [];
-    for await (const chunk of stream) {
-        chunks.push(chunk);
-    }
-    return JSON.parse(Buffer.concat(chunks).toString('utf8'));
-}
 
 export async function POST(request) {
     const data = await streamToJSON(request.body);
